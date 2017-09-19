@@ -90,6 +90,46 @@
                         (preorder (cadr bst))
                         (preorder (cadr (cdr bst))))))))
 
+(define inorder
+  (lambda (bst)
+    (cond ((is-leaf? bst) (list (car bst)))
+          ((null? (cadr bst)) (cons (car bst)
+                                    (inorder (cadr (cdr bst)))))
+          ((null? (cadr (cdr bst))) (cons (car bst)
+                                          (inorder (cadr bst))))
+          (else (append (inorder (cadr bst))
+                        (list (car bst))
+                        (inorder (cadr (cdr bst))))))))
+
+(define postorder
+  (lambda (bst)
+    (cond ((is-leaf? bst) (list (car bst)))
+          ((null? (cadr bst)) (cons (car bst)
+                                    (postorder (cadr (cdr bst)))))
+          ((null? (cadr (cdr bst))) (cons (car bst)
+                                          (postorder (cadr bst))))
+          (else (append (postorder (cadr bst))
+                        (postorder (cadr (cdr bst)))
+                        (list (car bst)))))))
+
+(define insert
+  (lambda (v bst)
+    (if (is-leaf? bst)
+        (cond ((< v (car bst)) (make-bst (car bst)
+                                         (list v '() '())
+                                         '()))
+              ((> v (car bst)) (make-bst (car bst)
+                                         '()
+                                         (list v '() '())))
+              (else bst))
+        (cond ((< v (car bst)) (make-bst (car bst)
+                                         (insert v (cadr bst))
+                                         (cadr (cdr bst))))
+              ((> v (car bst)) (make-bst (car bst)
+                                         (cadr bst)
+                                         (insert v (cadr (cdr bst)))))))))
+                       
+
 (check-equal? (null-bst? '()) #t)
 (check-equal? (null-bst? '(0 () ())) #f)
 (check-equal? (null-bst? (null-bst)) #t)
@@ -130,4 +170,8 @@
 (check-equal? (preorder '(5 () ())) '(5))
 (check-equal? (preorder '(5 (4 () ()) ())) '(5 4))
 (check-equal? (preorder '(5 (4 () ()) (6 () ()))) '(5 4 6))
-(check-equal? (preorder '(1 (2 (4 () ()) (5 () ())) (3 () ()))) '(1 2 4 5 3))
+(check-equal? (preorder '(4 (1 (0 () ()) (3 () ())) (5 () ()))) '(4 1 0 3 5))
+
+(check-equal? (inorder '(4 (1 (0 () ()) (3 () ())) (5 () ()))) '(0 1 3 4 5))
+(check-equal? (postorder '(4 (1 (0 () ()) (3 () ())) (5 () ()))) '(0 3 1 5 4))
+(check-equal? (insert 6 '(4 (1 (0 () ()) (3 () ())) (5 () ()))) '(4 (1 (0 () ()) (3 () ())) (5 () (6 () ()))))
