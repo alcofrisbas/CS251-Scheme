@@ -1,9 +1,12 @@
 (#%require rackunit)
 
+;; returns an empty bst
 (define null-bst
   (lambda ()
     '()))
 
+;; returns the value of the root node of a valid bst
+;; returns #f if bst is null or invalid
 (define entry
   (lambda (bst)
     (if (and (bst? bst)
@@ -11,6 +14,8 @@
         (car bst)
         #f)))
 
+;; returns the left subtree of a valid bst
+;; returns #f if bst is null or invalid
 (define left
   (lambda (bst)
     (if (and (bst? bst)
@@ -18,6 +23,8 @@
         (cadr bst)
         #f)))
 
+;; returns the right subtree of a valid bst
+;; returns #f if bst is null or invalid
 (define right
   (lambda (bst)
     (if (and (bst? bst)
@@ -25,28 +32,36 @@
         (cadr (cdr bst))
         #f)))
 
+;; returns a bst with elt as the root value, left as the left subtree, and right as the right subtree
+;; returns #f if if input is invalid
 (define make-bst
   (lambda (elt left right)
     (if (bst? (list elt left right))
         (list elt left right)
         #f)))
 
+;; returns #t if bst is null, #f otherwise
 (define null-bst?
   (lambda (bst)
     (if (null? bst)
         #t
         #f)))
 
+;; returns #t if bst is valid, #f otherwise
 (define bst?
   (lambda (bst)
     (if (bst-helper bst)
         #t
         #f)))
 
+;; helper procedure for bst?
+;; returns the root value of a valid non-empty bst
+;; returns #t if bst is null
+;; returns #f if bst is invalid
 (define bst-helper
   (lambda (bst) 
     (cond ((null? bst) #t)
-          ((or (not (list? bst))
+          ((or (not (list? bst))       ; check for valid bst conditions
                (not (equal? (length bst) 3))
                (not (integer? (car bst)))
                (not (bst-helper (cadr bst)))
@@ -57,9 +72,10 @@
                (and (integer? (bst-helper (cadr (cdr bst))))
                     (<= (bst-helper (cadr (cdr bst)))
                         (car bst))))
-           #f)
-          (else (car bst)))))
+           #f)                        ; return false if any conditions are invalid
+          (else (car bst)))))         ; return the value of the current node otherwise
 
+;; returns #t if bst has a node with value v, #f otherwise 
 (define member?
   (lambda (v bst)
     (cond ((null? bst) #f)
@@ -67,6 +83,9 @@
           ((> v (car bst)) (member? v (cadr (cdr bst))))
           (else (member? v (cadr bst))))))
 
+;; returns #t if bst is a properly-formed leaf;
+;; i.e., has an integer value and two empty list children
+;; returns #f otherwise
 (define is-leaf?
   (lambda (bst)
     (if (and (integer? (car bst))
@@ -75,6 +94,8 @@
         #t
         #f)))
 
+;; returns a list containing all values in bst
+;; in the order obtained from a preorder traversal
 (define preorder
   (lambda (bst)
     (cond ((is-leaf? bst) (list (car bst)))
@@ -86,6 +107,8 @@
                         (preorder (cadr bst))
                         (preorder (cadr (cdr bst))))))))
 
+;; returns a list containing all values in bst
+;; in the order obtained from an inorder traversal
 (define inorder
   (lambda (bst)
     (cond ((is-leaf? bst) (list (car bst)))
@@ -97,6 +120,8 @@
                         (list (car bst))
                         (inorder (cadr (cdr bst))))))))
 
+;; returns a list containing all values in bst
+;; in the order obtained from a postorder traversal
 (define postorder
   (lambda (bst)
     (cond ((is-leaf? bst) (list (car bst)))
@@ -108,6 +133,8 @@
                         (postorder (cadr (cdr bst)))
                         (list (car bst)))))))
 
+;; returns a new bst identical to bst with integer v inserted in the proper location
+;; returns #f if v is not an integer
 (define insert
   (lambda (v bst)
     (cond ((not (integer? v)) #f)
