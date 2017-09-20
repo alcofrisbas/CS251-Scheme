@@ -46,7 +46,7 @@
 (define bst-helper
   (lambda (bst) 
     (cond ((null? bst) #t)
-          ((or (not (pair? bst))
+          ((or (not (list? bst))
                (not (equal? (length bst) 3))
                (not (integer? (car bst)))
                (not (bst-helper (cadr bst)))
@@ -63,13 +63,9 @@
 (define member?
   (lambda (v bst)
     (cond ((null? bst) #f)
-          ((equal? (car bst)
-                   v) #t)
-          ((> v
-              (car bst)) (member? v
-                                  (cadr (cdr bst))))
-          (else (member? v
-                         (cadr bst))))))
+          ((equal? (car bst) v) #t)
+          ((> v (car bst)) (member? v (cadr (cdr bst))))
+          (else (member? v (cadr bst))))))
 
 (define is-leaf?
   (lambda (bst)
@@ -114,22 +110,22 @@
 
 (define insert
   (lambda (v bst)
-    (if (is-leaf? bst)
-        (cond ((< v (car bst)) (make-bst (car bst)
-                                         (list v '() '())
-                                         '()))
-              ((> v (car bst)) (make-bst (car bst)
-                                         '()
-                                         (list v '() '())))
-              (else bst))
-        (cond ((< v (car bst)) (make-bst (car bst)
-                                         (insert v (cadr bst))
-                                         (cadr (cdr bst))))
-              ((> v (car bst)) (make-bst (car bst)
-                                         (cadr bst)
-                                         (insert v (cadr (cdr bst)))))))))
+    (cond ((not (integer? v)) #f)
+          ((null-bst? bst) (make-bst v '() '()))  
+          ((is-leaf? bst) (cond ((< v (car bst)) (make-bst (car bst)
+                                                           (list v '() '())
+                                                           '()))
+                                ((> v (car bst)) (make-bst (car bst)
+                                                           '()
+                                                           (list v '() '())))
+                                (else bst)))
+          (else (cond ((< v (car bst)) (make-bst (car bst)
+                                                 (insert v (cadr bst))
+                                                 (cadr (cdr bst))))
+                      ((> v (car bst)) (make-bst (car bst)
+                                                 (cadr bst)
+                                                 (insert v (cadr (cdr bst))))))))))
                        
-
 (check-equal? (null-bst? '()) #t)
 (check-equal? (null-bst? '(0 () ())) #f)
 (check-equal? (null-bst? (null-bst)) #t)
@@ -172,6 +168,23 @@
 (check-equal? (preorder '(5 (4 () ()) (6 () ()))) '(5 4 6))
 (check-equal? (preorder '(4 (1 (0 () ()) (3 () ())) (5 () ()))) '(4 1 0 3 5))
 
+(check-equal? (inorder '(5 () ())) '(5))
+(check-equal? (inorder '(5 (4 () ()) ())) '(5 4))
+(check-equal? (inorder '(5 (4 () ()) (6 () ()))) '(4 5 6))
 (check-equal? (inorder '(4 (1 (0 () ()) (3 () ())) (5 () ()))) '(0 1 3 4 5))
+
+(check-equal? (postorder '(5 () ())) '(5))
+(check-equal? (postorder '(5 (4 () ()) ())) '(5 4))
+(check-equal? (postorder '(5 (4 () ()) (6 () ()))) '(4 6 5))
 (check-equal? (postorder '(4 (1 (0 () ()) (3 () ())) (5 () ()))) '(0 3 1 5 4))
-(check-equal? (insert 6 '(4 (1 (0 () ()) (3 () ())) (5 () ()))) '(4 (1 (0 () ()) (3 () ())) (5 () (6 () ()))))
+
+(check-equal? (insert 5 '()) '(5 () ()))
+(check-equal? (insert 5 '(5 () ())) '(5 () ()))
+(check-equal? (insert 6 '(4 (1 (0 () ()) (3 () ())) (5 () ())))
+              '(4 (1 (0 () ()) (3 () ())) (5 () (6 () ()))))
+(check-equal? (insert '() '(5 () ())) #f)
+(check-equal? (insert #f '(4 (1 (0 () ()) (3 () ())) (5 () ()))) #f)
+
+(define lst (make-bst 1 '() '()))               ; Testing to see whether or not insert returns a new bst or the same bst
+(check-equal? (insert 6 lst) '(1 () (6 () ()))) ;(it returns a new one :) )
+(check-equal? lst '(1 () ()))
