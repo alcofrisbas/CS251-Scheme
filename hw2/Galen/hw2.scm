@@ -145,11 +145,11 @@
                                 ((> v (car bst)) (make-bst (car bst)
                                                            '()
                                                            (list v '() '())))
-                                (else bst)))
-          (else (cond ((< v (car bst)) (make-bst (car bst)
-                                                 (insert v (cadr bst))
-                                                 (cadr (cdr bst))))
-                      ((> v (car bst)) (make-bst (car bst)
+                                (else bst))) ;if the left or right nodes are leaves,
+          (else (cond ((< v (car bst)) (make-bst (car bst) ;they are made into one-node 
+                                                 (insert v (cadr bst)) ;bsts and added in
+                                                 (cadr (cdr bst)))) ;otherwise, insert is
+                      ((> v (car bst)) (make-bst (car bst) ;called on the appropriate node.
                                                  (cadr bst)
                                                  (insert v (cadr (cdr bst))))))))))
                        
@@ -164,8 +164,8 @@
 (check-equal? (bst? '(3)) #f)
 (check-equal? (bst? '(() () ())) #f)
 (check-equal? (bst? '((5) () ())) #f)
-(check-equal? (bst? '(5 (6 () ()) ())) #f)
-(check-equal? (bst? '(5 () (4 () ()))) #f)
+(check-equal? (bst? '(5 (6 () ()) ())) #f) ;incorrect node order
+(check-equal? (bst? '(5 () (4 () ()))) #f) ;incorrect node order
 (check-equal? (bst? '(5 (4 () ()) (6 () (7 () ())))) #t)
 
 (check-equal? (entry (null-bst)) #f)
